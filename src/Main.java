@@ -5,18 +5,8 @@ public class Main {
     // Static list of users, acting as a database
     private static ArrayList<User> users = new ArrayList<>();
 
-    // Mock authentication service that always returns the first user when log in, and does nothing when sign up
-    private static IAuthenticationService authService = new IAuthenticationService() {
-        @Override
-        public User signUp(String username, String password) {
-            return null;
-        }
-
-        @Override
-        public User logIn(String username, String password) {
-            return users.get(0);
-        }
-    };
+    // Using the AuthenticationService instead of the mock
+    private static IAuthenticationService authService = new AuthenticationService(users);
     private static boolean isRunning = true;
 
     /**
@@ -76,8 +66,12 @@ public class Main {
         System.out.print("Enter your password: ");
         String password = scanner.nextLine();
         User user = authService.logIn(username, password);
-        System.out.println("Welcome, " + user.getUsername() + "!");
-        // TODO Later: Add the to-do list operations
+        if (user != null) {
+            System.out.println("Welcome, " + user.getUsername() + "!");
+            // TODO Later: Add the to-do list operations
+        } else {
+            System.out.println("Invalid username or password!");
+        }
     }
 
     /**
@@ -90,7 +84,11 @@ public class Main {
         System.out.print("Enter your password: ");
         String password = scanner.nextLine();
         User user = authService.signUp(username, password);
-        // TODO Later: Shows a message based on the result
+        if (user != null) {
+            System.out.println("User " + username + " has been created successfully!");
+        } else {
+            System.out.println("The username is already taken!");
+        }
     }
 
     /**
@@ -99,4 +97,33 @@ public class Main {
     public static void onExit() {
         isRunning = false;
     }
+}
+
+class User {
+    private String username;
+    private String password;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    /**
+     * Gets the username of the user.
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * Gets the password of the user.
+     */
+    public String getPassword() {
+        return password;
+    }
+}
+
+interface IAuthenticationService {
+    User signUp(String username, String password);
+    User logIn(String username, String password);
 }
